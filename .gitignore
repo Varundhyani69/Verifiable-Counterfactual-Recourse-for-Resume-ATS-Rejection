@@ -1,0 +1,70 @@
+# Python
+__pycache__/
+*.py[cod]
+*.pyo
+*.pyd
+.Python
+*.egg-info/
+dist/
+build/
+.eggs/
+*.egg
+
+# Virtual environments
+.venv/
+venv/
+env/
+ENV/
+
+# Environment files — NEVER commit real credentials
+.env
+.env.local
+.env.*.local
+
+# Test and coverage
+.pytest_cache/
+.coverage
+coverage.xml
+htmlcov/
+.hypothesis/
+
+# Type checking
+.mypy_cache/
+
+# Ruff
+.ruff_cache/
+
+# Node / frontend
+frontend/node_modules/
+frontend/.next/
+frontend/dist/
+frontend/coverage/
+frontend/.env
+frontend/.env.local
+
+# Database
+*.sqlite
+*.db
+
+# Uploads (runtime data, not source)
+uploads/
+/tmp/
+
+# IDE
+.vscode/settings.json
+.idea/
+*.swp
+*.swo
+
+# OS
+.DS_Store
+Thumbs.db
+
+# Alembic — keep migrations, ignore generated pyc
+alembic/__pycache__/
+
+# Secrets — explicit belt-and-suspenders
+*.pem
+*.key
+credentials.json
+secrets.yaml
