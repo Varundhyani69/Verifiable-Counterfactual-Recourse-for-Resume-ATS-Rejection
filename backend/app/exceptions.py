@@ -39,7 +39,9 @@ class ImmutableRecordError(AppError):
     def __init__(self, record_type: str) -> None:
         super().__init__(
             code="IMMUTABLE_RECORD",
-            message=f"{record_type} records are append-only and cannot be modified after creation.",
+            message=(
+                f"{record_type} records are append-only and cannot be modified after creation."
+            ),
             http_status=409,
         )
 

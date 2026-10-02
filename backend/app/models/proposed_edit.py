@@ -12,9 +12,9 @@ Junction tables:
 from __future__ import annotations
 
 import uuid
-from typing import TYPE_CHECKING
+from typing import TYPE_CHECKING, Any
 
-from sqlalchemy import Float, ForeignKey, String, Table, Text, Column
+from sqlalchemy import Column, Float, ForeignKey, String, Table, Text
 from sqlalchemy.dialects.postgresql import UUID
 from sqlalchemy.orm import Mapped, mapped_column, relationship
 
@@ -100,18 +100,25 @@ class ProposedEdit(UUIDPrimaryKeyMixin, TimestampMixin, Base):
     )
 
     # Relationships
-    resume_version: Mapped["ResumeVersion"] = relationship(
+    resume_version: Mapped[ResumeVersion] = relationship(
         "ResumeVersion", back_populates="proposed_edits"
     )
-    evidence_facts: Mapped[list["CandidateFact"]] = relationship(
+    evidence_facts: Mapped[list[CandidateFact]] = relationship(
         "CandidateFact", secondary=proposed_edit_facts
     )
-    job_requirements: Mapped[list["JobRequirement"]] = relationship(
+    job_requirements: Mapped[list[JobRequirement]] = relationship(
         "JobRequirement", secondary=proposed_edit_requirements
     )
 
+    def __init__(self, **kwargs: Any) -> None:
+        kwargs.setdefault("verification_status", VerificationStatus.NEEDS_CONFIRMATION)
+        kwargs.setdefault("edit_cost", 0.0)
+        kwargs.setdefault("score_contribution", 0.0)
+        super().__init__(**kwargs)
+
     def __repr__(self) -> str:
+        cost_str = f"{self.edit_cost:.3f}" if self.edit_cost is not None else "None"
         return (
             f"<ProposedEdit id={self.id} type={self.edit_type} "
-            f"status={self.verification_status} cost={self.edit_cost:.3f}>"
+            f"status={self.verification_status} cost={cost_str}>"
         )

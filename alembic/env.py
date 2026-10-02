@@ -10,14 +10,16 @@ from __future__ import annotations
 import os
 from logging.config import fileConfig
 
-from alembic import context
 from sqlalchemy import engine_from_config, pool
+
+import backend.app.models  # noqa: F401 — registers all tables on Base.metadata
+from alembic import context
 
 # ---------------------------------------------------------------------------
 # Import all ORM models so Alembic can detect them for autogenerate.
 # ---------------------------------------------------------------------------
 from backend.app.database import Base  # noqa: F401 — populates Base.metadata
-import backend.app.models  # noqa: F401 — registers all tables on Base.metadata
+
 # ---------------------------------------------------------------------------
 
 config = context.config

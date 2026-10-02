@@ -32,17 +32,12 @@ from backend.app.models import (
     proposed_edit_requirements,
 )
 from backend.app.models.enums import (
-    ATSDecision,
     BaselineMethod,
     ClaimType,
-    DocumentType,
     EditType,
-    ExtractionType,
     ImportanceLevel,
-    RequirementType,
     VerificationStatus,
 )
-
 
 # ── Enum value tests ──────────────────────────────────────────────────────────
 
