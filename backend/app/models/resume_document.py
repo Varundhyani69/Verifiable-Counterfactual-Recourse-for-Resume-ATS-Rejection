@@ -49,13 +49,13 @@ class ResumeDocument(UUIDPrimaryKeyMixin, TimestampMixin, Base):
     )
 
     # Relationships
-    candidate_facts: Mapped[list["CandidateFact"]] = relationship(
+    candidate_facts: Mapped[list[CandidateFact]] = relationship(
         "CandidateFact",
         back_populates="source_document",
         cascade="all, delete-orphan",  # Req 14.6
         passive_deletes=True,
     )
-    resume_versions: Mapped[list["ResumeVersion"]] = relationship(
+    resume_versions: Mapped[list[ResumeVersion]] = relationship(
         "ResumeVersion",
         back_populates="original_resume",
         cascade="all, delete-orphan",

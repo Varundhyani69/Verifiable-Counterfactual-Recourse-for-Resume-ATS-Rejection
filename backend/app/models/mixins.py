@@ -5,7 +5,8 @@ SQLAlchemy ORM mixins shared across domain models.
 from __future__ import annotations
 
 import uuid
-from datetime import datetime, timezone
+from datetime import UTC, datetime
+from typing import Any
 
 from sqlalchemy import DateTime, func
 from sqlalchemy.dialects.postgresql import UUID
@@ -32,8 +33,12 @@ class TimestampMixin:
         DateTime(timezone=True),
         nullable=False,
         server_default=func.now(),
-        default=lambda: datetime.now(timezone.utc),
+        default=lambda: datetime.now(UTC),
     )
+
+    def __init__(self, **kwargs: Any) -> None:
+        kwargs.setdefault("created_at", datetime.now(UTC))
+        super().__init__(**kwargs)
 
 
 class UpdatedAtMixin:
@@ -43,8 +48,8 @@ class UpdatedAtMixin:
         DateTime(timezone=True),
         nullable=False,
         server_default=func.now(),
-        default=lambda: datetime.now(timezone.utc),
-        onupdate=lambda: datetime.now(timezone.utc),
+        default=lambda: datetime.now(UTC),
+        onupdate=lambda: datetime.now(UTC),
     )
 
 

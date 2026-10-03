@@ -9,9 +9,9 @@ inferred), and source span for full traceability (Req 2.3, 2.4, 2.5).
 from __future__ import annotations
 
 import uuid
-from typing import Any, TYPE_CHECKING
+from typing import TYPE_CHECKING, Any
 
-from sqlalchemy import String, Text
+from sqlalchemy import ForeignKey, String, Text
 from sqlalchemy.dialects.postgresql import JSONB, UUID
 from sqlalchemy.orm import Mapped, mapped_column, relationship
 
@@ -35,6 +35,7 @@ class JobRequirement(UUIDPrimaryKeyMixin, Base):
 
     job_description_id: Mapped[uuid.UUID] = mapped_column(
         UUID(as_uuid=True),
+        ForeignKey("job_descriptions.id", ondelete="CASCADE"),
         nullable=False,
         index=True,
         doc="FK → job_descriptions(id) ON DELETE CASCADE",
@@ -64,10 +65,14 @@ class JobRequirement(UUIDPrimaryKeyMixin, Base):
     )
 
     # Relationships
-    job_description: Mapped["JobDescription"] = relationship(
+    job_description: Mapped[JobDescription] = relationship(
         "JobDescription",
         back_populates="requirements",
     )
+
+    def __init__(self, **kwargs: Any) -> None:
+        kwargs.setdefault("importance", ImportanceLevel.REQUIRED)
+        super().__init__(**kwargs)
 
     def __repr__(self) -> str:
         return (

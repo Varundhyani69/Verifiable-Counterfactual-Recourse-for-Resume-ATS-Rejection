@@ -14,7 +14,7 @@ from __future__ import annotations
 import uuid
 from typing import TYPE_CHECKING
 
-from sqlalchemy import Float, Integer, String, Text, UniqueConstraint
+from sqlalchemy import Float, ForeignKey, Integer, String, Text, UniqueConstraint
 from sqlalchemy.dialects.postgresql import UUID
 from sqlalchemy.orm import Mapped, mapped_column, relationship
 
@@ -46,6 +46,7 @@ class ResumeVersion(UUIDPrimaryKeyMixin, TimestampMixin, Base):
 
     original_resume_id: Mapped[uuid.UUID] = mapped_column(
         UUID(as_uuid=True),
+        ForeignKey("resume_documents.id", ondelete="CASCADE"),
         nullable=False,
         index=True,
         doc="FK → resume_documents(id)",
@@ -64,11 +65,11 @@ class ResumeVersion(UUIDPrimaryKeyMixin, TimestampMixin, Base):
     )
 
     # Relationships
-    original_resume: Mapped["ResumeDocument"] = relationship(
+    original_resume: Mapped[ResumeDocument] = relationship(
         "ResumeDocument",
         back_populates="resume_versions",
     )
-    proposed_edits: Mapped[list["ProposedEdit"]] = relationship(
+    proposed_edits: Mapped[list[ProposedEdit]] = relationship(
         "ProposedEdit",
         back_populates="resume_version",
         cascade="all, delete-orphan",

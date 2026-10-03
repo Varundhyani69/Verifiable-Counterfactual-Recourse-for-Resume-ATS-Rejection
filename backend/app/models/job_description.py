@@ -27,7 +27,7 @@ class JobDescription(UUIDPrimaryKeyMixin, TimestampMixin, Base):
     raw_text: Mapped[str] = mapped_column(Text, nullable=False)
 
     # Relationships
-    requirements: Mapped[list["JobRequirement"]] = relationship(
+    requirements: Mapped[list[JobRequirement]] = relationship(
         "JobRequirement",
         back_populates="job_description",
         cascade="all, delete-orphan",

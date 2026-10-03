@@ -11,7 +11,7 @@ during a session — including rejected ones — not just the accepted set (Req 
 from __future__ import annotations
 
 import uuid
-from typing import Any, TYPE_CHECKING
+from typing import TYPE_CHECKING, Any
 
 from sqlalchemy import Boolean, Column, Float, ForeignKey, Integer, String, Table
 from sqlalchemy.dialects.postgresql import JSONB, UUID
@@ -107,7 +107,7 @@ class ExperimentRun(AppendOnlyMixin, UUIDPrimaryKeyMixin, TimestampMixin, Base):
     )
 
     # Relationships
-    all_edits: Mapped[list["ProposedEdit"]] = relationship(
+    all_edits: Mapped[list[ProposedEdit]] = relationship(
         "ProposedEdit",
         secondary=experiment_run_edits,
         doc="ALL generated edits including rejected ones (Req 10.4)",

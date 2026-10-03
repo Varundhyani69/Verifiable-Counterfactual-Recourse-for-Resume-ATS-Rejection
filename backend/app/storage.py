@@ -13,7 +13,7 @@ from __future__ import annotations
 
 import os
 from pathlib import Path
-from typing import Protocol, runtime_checkable
+from typing import Protocol, cast, runtime_checkable
 
 
 @runtime_checkable
@@ -69,7 +69,7 @@ class S3CompatibleStorage:
 
     def __init__(self) -> None:
         try:
-            import boto3  # type: ignore[import]
+            import boto3
         except ImportError as exc:
             raise ImportError(
                 "boto3 is required for S3CompatibleStorage. "
@@ -92,7 +92,7 @@ class S3CompatibleStorage:
         # path format: s3://<bucket>/<key>
         key = path.split("/", 3)[-1]
         response = self._client.get_object(Bucket=self._bucket, Key=key)
-        return response["Body"].read()
+        return cast(bytes, response["Body"].read())
 
     def delete(self, path: str) -> None:
         key = path.split("/", 3)[-1]
