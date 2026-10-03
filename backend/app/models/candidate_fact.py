@@ -13,16 +13,15 @@ Key invariants (enforced by the service layer, not the DB alone):
 from __future__ import annotations
 
 import uuid
-from datetime import datetime, timezone
-from typing import Any, TYPE_CHECKING
+from typing import TYPE_CHECKING, Any
 
-from sqlalchemy import DateTime, String, Text, func
+from sqlalchemy import ForeignKey, String, Text
 from sqlalchemy.dialects.postgresql import JSONB, UUID
 from sqlalchemy.orm import Mapped, mapped_column, relationship
 
 from backend.app.database import Base
 from backend.app.models.enums import ClaimType, VerificationStatus
-from backend.app.models.mixins import TimestampMixin, UUIDPrimaryKeyMixin, UpdatedAtMixin
+from backend.app.models.mixins import TimestampMixin, UpdatedAtMixin, UUIDPrimaryKeyMixin
 
 if TYPE_CHECKING:
     from backend.app.models.resume_document import ResumeDocument
@@ -56,6 +55,7 @@ class CandidateFact(UUIDPrimaryKeyMixin, TimestampMixin, UpdatedAtMixin, Base):
     )
     source_document_id: Mapped[uuid.UUID] = mapped_column(
         UUID(as_uuid=True),
+        ForeignKey("resume_documents.id", ondelete="CASCADE"),
         nullable=False,
         index=True,
         doc="FK → resume_documents(id) ON DELETE CASCADE",
@@ -79,10 +79,14 @@ class CandidateFact(UUIDPrimaryKeyMixin, TimestampMixin, UpdatedAtMixin, Base):
     )
 
     # Relationships
-    source_document: Mapped["ResumeDocument"] = relationship(
+    source_document: Mapped[ResumeDocument] = relationship(
         "ResumeDocument",
         back_populates="candidate_facts",
     )
+
+    def __init__(self, **kwargs: Any) -> None:
+        kwargs.setdefault("verification_status", VerificationStatus.NEEDS_CONFIRMATION)
+        super().__init__(**kwargs)
 
     def __repr__(self) -> str:
         return (
