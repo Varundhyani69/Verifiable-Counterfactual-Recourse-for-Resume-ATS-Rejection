@@ -15,12 +15,26 @@ from __future__ import annotations
 import uuid
 from unittest.mock import MagicMock
 
+import pytest
 from hypothesis import given, settings
 from hypothesis import strategies as st
 
 from backend.app.models.enums import DocumentType, VerificationStatus
 from backend.app.models.resume_document import ResumeDocument
 from backend.app.services import evidence_extractor
+
+# Skip the entire module when spaCy is not installed.
+try:
+    import spacy  # noqa: F401
+    spacy.load("en_core_web_sm")
+    _SPACY_AVAILABLE = True
+except (ImportError, OSError):
+    _SPACY_AVAILABLE = False
+
+pytestmark = pytest.mark.skipif(
+    not _SPACY_AVAILABLE,
+    reason="spaCy model 'en_core_web_sm' not installed",
+)
 
 # Strategy to generate varied resume texts
 _resume_text_samples = st.sampled_from([
