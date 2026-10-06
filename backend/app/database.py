@@ -59,7 +59,6 @@ def _get_session_factory() -> Any:
 
 
 # Public aliases used throughout the codebase.
-# Accessing ``engine`` or ``SessionLocal`` on first use initialises the pool.
 class _LazyEngine:
     """Proxy that creates the real engine on first attribute access."""
 
@@ -92,12 +91,6 @@ def get_db() -> Generator[Session, None, None]:
     """
     FastAPI dependency that yields a database session and closes it
     when the request completes (success or error).
-
-    Usage::
-
-        @router.get("/example")
-        def example(db: Session = Depends(get_db)):
-            ...
     """
     db = SessionLocal()
     try:

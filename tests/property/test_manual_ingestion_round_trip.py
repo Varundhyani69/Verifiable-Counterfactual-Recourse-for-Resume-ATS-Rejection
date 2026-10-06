@@ -23,18 +23,15 @@ from backend.app.database import get_db
 from backend.app.main import app
 from backend.app.models.resume_document import ResumeDocument
 
-# Skip the entire module when spaCy is not installed — the ingestion
-# service calls evidence_extractor which requires spaCy at runtime.
 try:
-    import spacy  # noqa: F401
+    import spacy
     spacy.load("en_core_web_sm")
     _SPACY_AVAILABLE = True
 except (ImportError, OSError):
     _SPACY_AVAILABLE = False
 
 pytestmark = pytest.mark.skipif(
-    not _SPACY_AVAILABLE,
-    reason="spaCy model 'en_core_web_sm' not installed",
+    not _SPACY_AVAILABLE, reason="spaCy model 'en_core_web_sm' not installed"
 )
 
 # Generate arbitrary non-empty strings up to 1,000 chars

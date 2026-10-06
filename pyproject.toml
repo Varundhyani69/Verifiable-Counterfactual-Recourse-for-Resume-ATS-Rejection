@@ -20,7 +20,7 @@ dependencies = [
     "psycopg2-binary==2.9.9",
     # NLP / ML
     "sentence-transformers==2.7.0",
-    "spacy==3.7.4",
+    "spacy==3.7.5",
     "transformers==4.40.1",
     "torch==2.3.0",
     # Document processing
@@ -32,6 +32,7 @@ dependencies = [
     "reportlab==4.1.0",
     # Utilities
     "python-multipart==0.0.9",
+    "pyyaml==6.0.1",
 ]
 
 [project.optional-dependencies]
