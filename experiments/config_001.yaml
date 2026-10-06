@@ -1,0 +1,20 @@
+# Experiment config 001 — baseline comparison: proposed method
+# Used by: python research_cli.py run --config experiments/config_001.yaml ...
+
+experiment_id: "exp-001"
+baseline_method: "proposed"
+random_seed: 42
+
+model_configuration:
+  sbert_model: "all-MiniLM-L6-v2"
+  sbert_version: "1.0"
+  spacy_model: "en_core_web_sm"
+  spacy_version: "3.7.4"
+  ats_skill_weight: 0.5
+  ats_sbert_weight: 0.5
+  threshold: 0.5
+  edit_cost_weights:
+    levenshtein: 0.25
+    changed_statements: 0.25
+    semantic_change: 0.25
+    moved_sections: 0.25

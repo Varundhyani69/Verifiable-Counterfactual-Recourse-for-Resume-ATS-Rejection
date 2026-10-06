@@ -14,6 +14,7 @@ from __future__ import annotations
 import uuid
 from unittest.mock import MagicMock
 
+import pytest
 from fastapi.testclient import TestClient
 from hypothesis import given, settings
 from hypothesis import strategies as st
@@ -21,6 +22,17 @@ from hypothesis import strategies as st
 from backend.app.database import get_db
 from backend.app.main import app
 from backend.app.models.resume_document import ResumeDocument
+
+try:
+    import spacy
+    spacy.load("en_core_web_sm")
+    _SPACY_AVAILABLE = True
+except (ImportError, OSError):
+    _SPACY_AVAILABLE = False
+
+pytestmark = pytest.mark.skipif(
+    not _SPACY_AVAILABLE, reason="spaCy model 'en_core_web_sm' not installed"
+)
 
 # Generate arbitrary non-empty strings up to 1,000 chars
 _manual_text_strategy = st.text(min_size=1, max_size=1000, alphabet=st.characters(

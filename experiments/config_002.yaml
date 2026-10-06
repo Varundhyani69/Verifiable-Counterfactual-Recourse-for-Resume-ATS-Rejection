@@ -1,0 +1,20 @@
+# Experiment config 002 — baseline A: original resume (no edits)
+# Used by: python research_cli.py run --config experiments/config_002.yaml ...
+
+experiment_id: "exp-002"
+baseline_method: "original_resume"
+random_seed: 42
+
+model_configuration:
+  sbert_model: "all-MiniLM-L6-v2"
+  sbert_version: "1.0"
+  spacy_model: "en_core_web_sm"
+  spacy_version: "3.7.4"
+  ats_skill_weight: 0.5
+  ats_sbert_weight: 0.5
+  threshold: 0.5
+  edit_cost_weights:
+    levenshtein: 0.25
+    changed_statements: 0.25
+    semantic_change: 0.25
+    moved_sections: 0.25
