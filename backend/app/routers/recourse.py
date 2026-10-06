@@ -1,9 +1,11 @@
 """
-API router for recourse generation.
+API router for recourse generation, verification, and explanation.
 
-    POST /api/recourse/generate — generate and optimize proposed edits
+    POST /api/recourse/generate                — generate and optimize proposed edits
+    POST /api/recourse/{resume_version_id}/verify — verify all edits for a resume version
+    PATCH /api/recourse/edits/{edit_id}/status — confirm or reject a Needs Confirmation edit
 
-Requirements: 5.1–5.8, 6.1–6.7
+Requirements: 5.1–5.8, 6.1–6.7, 7.1–7.8, 8.1–8.6
 """
 
 from __future__ import annotations
@@ -15,6 +17,12 @@ from sqlalchemy.orm import Session
 
 from backend.app.database import get_db
 from backend.app.response import error_response, success_response
+from backend.app.schemas.analysis import (
+    EditStatusUpdateRequest,
+    EditStatusUpdateResponse,
+    VerificationReportResponse,
+    VerifyResponse,
+)
 from backend.app.schemas.recourse import (
     OptimizationConfig,
     PartialResult,
@@ -24,6 +32,9 @@ from backend.app.schemas.recourse import (
 )
 from backend.app.services import optimizer as optimizer_svc
 from backend.app.services import recourse_engine
+from backend.app.services import verifier as verifier_svc
+from backend.app.services import explanation_service as explanation_svc
+from backend.app.exceptions import ResourceNotFoundError
 
 router = APIRouter(tags=["recourse"])
 
@@ -168,3 +179,88 @@ async def generate_recourse(
         projected_decision=opt_result.projected_decision,  # type: ignore[arg-type]
     )
     return success_response(response.model_dump(mode="json"), status_code=201)  # type: ignore[return-value]
+
+
+# ── POST /api/recourse/{resume_version_id}/verify ─────────────────────────────
+
+@router.post("/recourse/{resume_version_id}/verify")
+async def verify_recourse(
+    resume_version_id: uuid.UUID,
+    db: Session = Depends(get_db),
+) -> dict:  # type: ignore[type-arg]
+    """
+    Verify all ProposedEdits for a given ResumeVersion.
+
+    Runs the 4-step verification pipeline (span match, entity check, NLI
+    entailment, optional LLM advisory) on every edit linked to the
+    resume version, persists the assigned status, and returns one
+    VerificationReport per edit.
+
+    Requirements: 7.1–7.8
+    """
+    try:
+        reports = verifier_svc.verify_batch(
+            db=db,
+            resume_version_id=resume_version_id,
+            llm_config=None,  # LLM advisory disabled by default
+        )
+    except ResourceNotFoundError as exc:
+        return error_response("NOT_FOUND", exc.message, status_code=404)  # type: ignore[return-value]
+
+    report_responses = [
+        VerificationReportResponse(
+            edit_id=r.edit_id,
+            methods_used=r.methods_used,
+            evidence_fact_ids=r.evidence_fact_ids,
+            assigned_status=r.assigned_status,
+            entailment_score=r.entailment_score,
+            rationale=r.rationale,
+        )
+        for r in reports
+    ]
+
+    response = VerifyResponse(
+        resume_version_id=resume_version_id,
+        verification_reports=report_responses,
+    )
+    return success_response(response.model_dump(mode="json"))  # type: ignore[return-value]
+
+
+# ── PATCH /api/recourse/edits/{edit_id}/status ────────────────────────────────
+
+@router.patch("/recourse/edits/{edit_id}/status")
+async def update_edit_status(
+    edit_id: uuid.UUID,
+    body: EditStatusUpdateRequest,
+    db: Session = Depends(get_db),
+) -> dict:  # type: ignore[type-arg]
+    """
+    Confirm or reject a Needs Confirmation ProposedEdit.
+
+    - confirm → Needs Confirmation → Supported   (Req 8.5)
+    - reject  → Needs Confirmation → Unsupported (Req 8.6; no regeneration)
+
+    Requirements: 8.5, 8.6
+    """
+    try:
+        if body.action == "confirm":
+            edit = explanation_svc.confirm_edit(db=db, edit_id=edit_id)
+        else:
+            edit = explanation_svc.reject_edit(db=db, edit_id=edit_id)
+    except ResourceNotFoundError as exc:
+        return error_response("NOT_FOUND", exc.message, status_code=404)  # type: ignore[return-value]
+    except ValueError as exc:
+        return error_response("INVALID_REQUEST", str(exc), status_code=422)  # type: ignore[return-value]
+
+    status_val = (
+        edit.verification_status.value
+        if hasattr(edit.verification_status, "value")
+        else str(edit.verification_status)
+    )
+
+    response = EditStatusUpdateResponse(
+        edit_id=edit.id,
+        verification_status=status_val,
+        action_applied=body.action,
+    )
+    return success_response(response.model_dump(mode="json"))  # type: ignore[return-value]

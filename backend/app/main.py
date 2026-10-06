@@ -14,7 +14,7 @@ from fastapi.responses import JSONResponse
 
 from backend.app.exceptions import AppError
 from backend.app.response import error_response
-from backend.app.routers import experiments, recourse, resumes
+from backend.app.routers import analysis, experiments, recourse, resumes
 
 app = FastAPI(
     title="Verifiable Counterfactual Recourse — ATS Rejection",
@@ -74,6 +74,6 @@ async def health() -> dict[str, str]:
 app.include_router(resumes.router, prefix="/api")
 app.include_router(experiments.router, prefix="/api")
 app.include_router(recourse.router, prefix="/api")
+app.include_router(analysis.router, prefix="/api")
 # app.include_router(job_descriptions.router, prefix="/api")
 # app.include_router(candidates.router, prefix="/api")
-# app.include_router(analysis.router, prefix="/api")
