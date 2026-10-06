@@ -251,6 +251,9 @@ Every task has exactly one owner. No shared epics. Varun integrates everything a
 
 ### Dhruv — JD Analyzer + Evidence Bank
 
+Implementation and tests for Tasks 7 and 8 are complete locally. PR publication and
+CI review remain pending; see [Dhruv's handoff](../../../docs/dhruv-handoff.md).
+
 - [ ] 7. JD analyzer
   - **Owner: Dhruv** · Branch: `dhruv/jd-analyzer`
   - Implement `backend/app/services/jd_analyzer.py`:
@@ -270,23 +273,23 @@ Every task has exactly one owner. No shared epics. Varun integrates everything a
   - Wire `POST /api/job-descriptions` and `GET /api/job-descriptions/{id}`
   - _Requirements: 2.1–2.8_
 
-  - [ ] 7.1 Implement JD analyzer with NLP pipeline, importance, and normalization
+  - [x] 7.1 Implement JD analyzer with NLP pipeline, importance, and normalization
     - _Requirements: 2.1–2.8_
 
-  - [ ]* 7.2 Property test — JobRequirement importance invariant (Property 4)
+  - [x]* 7.2 Property test — JobRequirement importance invariant (Property 4)
     - `Feature: verifiable-counterfactual-recourse, Property 4`
     - Generate JD texts with and without signal words; assert `importance` is
       always exactly `"required"` or `"preferred"`; assert no-signal-word
       requirements default to `"required"`
     - **Validates: Requirements 2.3**
 
-  - [ ]* 7.3 Property test — skill normalization completeness (Property 5)
+  - [x]* 7.3 Property test — skill normalization completeness (Property 5)
     - `Feature: verifiable-counterfactual-recourse, Property 5`
     - For every `JobRequirement` returned, assert `normalized_skills` is non-empty
       and every entry is a non-empty string
     - **Validates: Requirements 2.6**
 
-  - [ ]* 7.4 Unit tests — JD analyzer
+  - [x]* 7.4 Unit tests — JD analyzer
     - Test each of the 8 known signal words maps to the correct importance
     - Test default `"required"` when no signal words present
     - Test canonical mapping `"JS" → "JavaScript"`
@@ -313,16 +316,16 @@ Every task has exactly one owner. No shared epics. Varun integrates everything a
   - Wire `GET /api/candidates/{id}/evidence` and `PATCH /api/candidates/{id}/evidence/{fact_id}`
   - _Requirements: 3.4–3.9_
 
-  - [ ] 8.1 Implement evidence bank CRUD with PATCH validation and audit trail
+  - [x] 8.1 Implement evidence bank CRUD with PATCH validation and audit trail
     - _Requirements: 3.4–3.9_
 
-  - [ ]* 8.2 Property test — original_claim_text immutability (Property 7)
+  - [x]* 8.2 Property test — original_claim_text immutability (Property 7)
     - `Feature: verifiable-counterfactual-recourse, Property 7`
     - Generate arbitrary sequences of PATCH operations (valid and invalid);
       assert `original_claim_text` remains byte-for-byte identical to its creation-time value
     - **Validates: Requirements 3.9**
 
-  - [ ]* 8.3 Unit tests — evidence bank
+  - [x]* 8.3 Unit tests — evidence bank
     - Test `get_usable_facts` excludes `Unsupported` facts
     - Test PATCH 422 on invalid status, empty `claim_text`, `claim_text` > 2000 chars
     - Test `updated_at` is stamped on successful PATCH
