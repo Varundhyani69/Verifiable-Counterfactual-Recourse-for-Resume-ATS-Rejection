@@ -1,11 +1,12 @@
 """
-API router for recourse generation, verification, and explanation.
+API router for recourse generation, verification, explanation, and export.
 
-    POST /api/recourse/generate                — generate and optimize proposed edits
-    POST /api/recourse/{resume_version_id}/verify — verify all edits for a resume version
-    PATCH /api/recourse/edits/{edit_id}/status — confirm or reject a Needs Confirmation edit
+    POST /api/recourse/generate                       — generate and optimize proposed edits
+    POST /api/recourse/{resume_version_id}/verify     — verify all edits for a resume version
+    PATCH /api/recourse/edits/{edit_id}/status        — confirm or reject a Needs Confirmation edit
+    POST /api/recourse/{resume_version_id}/accept     — accept edits and create new ResumeVersion
 
-Requirements: 5.1–5.8, 6.1–6.7, 7.1–7.8, 8.1–8.6
+Requirements: 5.1–5.8, 6.1–6.7, 7.1–7.8, 8.1–8.6, 9.1, 9.2, 9.6
 """
 
 from __future__ import annotations
@@ -13,9 +14,11 @@ from __future__ import annotations
 import uuid
 
 from fastapi import APIRouter, Depends
+from pydantic import BaseModel
 from sqlalchemy.orm import Session
 
 from backend.app.database import get_db
+from backend.app.exceptions import ResourceNotFoundError
 from backend.app.response import error_response, success_response
 from backend.app.schemas.analysis import (
     EditStatusUpdateRequest,
@@ -30,14 +33,16 @@ from backend.app.schemas.recourse import (
     RecourseGenerateRequest,
     RecourseGenerateResponse,
 )
+from backend.app.services import export_service
 from backend.app.services import optimizer as optimizer_svc
 from backend.app.services import recourse_engine
 from backend.app.services import verifier as verifier_svc
 from backend.app.services import explanation_service as explanation_svc
-from backend.app.exceptions import ResourceNotFoundError
 
 router = APIRouter(tags=["recourse"])
 
+
+# ── POST /api/recourse/generate ───────────────────────────────────────────────
 
 @router.post("/recourse/generate")
 async def generate_recourse(
@@ -264,3 +269,53 @@ async def update_edit_status(
         action_applied=body.action,
     )
     return success_response(response.model_dump(mode="json"))  # type: ignore[return-value]
+
+
+# ── POST /api/recourse/{resume_version_id}/accept ─────────────────────────────
+
+
+class AcceptRecourseRequest(BaseModel):
+    """Request body for POST /api/recourse/{resume_version_id}/accept."""
+
+    accepted_edit_ids: list[uuid.UUID]
+
+
+class AcceptRecourseResponse(BaseModel):
+    """Response body for POST /api/recourse/{resume_version_id}/accept."""
+
+    new_resume_version_id: uuid.UUID
+    version_number: int
+    original_resume_id: uuid.UUID
+
+
+@router.post("/recourse/{resume_version_id}/accept")
+async def accept_recourse(
+    resume_version_id: uuid.UUID,
+    body: AcceptRecourseRequest,
+    db: Session = Depends(get_db),
+) -> dict:  # type: ignore[type-arg]
+    """
+    Apply accepted ProposedEdits to create a new ResumeVersion.
+
+    - Delegates to export_service.apply_edits
+    - New version gets version_number = max_existing + 1  (Req 9.1)
+    - Original ResumeDocument and baseline version are never modified (Req 9.2)
+    - Returns new ResumeVersion metadata
+
+    Requirements: 9.1, 9.2, 9.6
+    """
+    try:
+        new_version = export_service.apply_edits(
+            db=db,
+            resume_version_id=resume_version_id,
+            accepted_edit_ids=body.accepted_edit_ids,
+        )
+    except ResourceNotFoundError as exc:
+        return error_response("NOT_FOUND", exc.message, status_code=404)  # type: ignore[return-value]
+
+    response = AcceptRecourseResponse(
+        new_resume_version_id=new_version.id,
+        version_number=new_version.version_number,
+        original_resume_id=new_version.original_resume_id,
+    )
+    return success_response(response.model_dump(mode="json"), status_code=201)  # type: ignore[return-value]
