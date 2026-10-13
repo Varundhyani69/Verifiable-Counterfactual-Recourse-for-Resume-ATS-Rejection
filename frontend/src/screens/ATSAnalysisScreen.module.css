@@ -1,0 +1,89 @@
+.container {
+  max-width: 700px;
+  margin: 2rem auto;
+  padding: 1.5rem;
+  font-family: sans-serif;
+}
+
+.scoreCircle {
+  width: 120px;
+  height: 120px;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 2rem;
+  font-weight: 700;
+  margin: 1rem auto;
+  color: white;
+}
+
+.scorePass { background: #16a34a; }
+.scoreFail { background: #dc2626; }
+
+.decisionBadge {
+  display: inline-block;
+  padding: 0.3rem 1rem;
+  border-radius: 999px;
+  font-weight: 700;
+  font-size: 1rem;
+  margin: 0.5rem 0;
+}
+
+.decisionPass { background: #dcfce7; color: #15803d; }
+.decisionFail { background: #fee2e2; color: #b91c1c; }
+
+.metricRow {
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+  margin: 0.5rem 0;
+}
+
+.metricLabel {
+  width: 200px;
+  font-weight: 500;
+}
+
+.progressBar {
+  flex: 1;
+  height: 12px;
+  background: #e5e7eb;
+  border-radius: 6px;
+  overflow: hidden;
+}
+
+.progressFill {
+  height: 100%;
+  background: #3b82f6;
+  border-radius: 6px;
+}
+
+.metricValue {
+  width: 50px;
+  text-align: right;
+  font-size: 0.9rem;
+}
+
+.disclosure {
+  font-style: italic;
+  color: #6b7280;
+  font-size: 0.9rem;
+  margin-top: 1.5rem;
+}
+
+.generateBtn {
+  margin-top: 1.5rem;
+  padding: 0.7rem 2rem;
+  background: #7c3aed;
+  color: white;
+  border: none;
+  border-radius: 6px;
+  cursor: pointer;
+  font-size: 1rem;
+}
+
+.generateBtn:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
+}
