@@ -27,5 +27,8 @@ export async function apiRequest<T>(url: string, options?: RequestInit): Promise
   if (json.error) {
     throw new ApiError(json.error.code, json.error.message)
   }
+  if (!res.ok) {
+    throw new ApiError('HTTP_ERROR', `Request failed with status ${res.status}`)
+  }
   return json.data as T
 }

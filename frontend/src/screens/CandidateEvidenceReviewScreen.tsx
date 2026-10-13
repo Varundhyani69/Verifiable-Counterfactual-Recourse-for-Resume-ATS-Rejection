@@ -111,11 +111,12 @@ function FactCard({ fact, candidateId }: { fact: CandidateFactResponse; candidat
 export function CandidateEvidenceReviewScreen() {
   const navigate = useNavigate()
   const { session, setSession } = useSession()
-  const candidateId = session.candidateId!
+  const candidateId = session.candidateId
 
   const evidenceQuery = useQuery({
-    queryKey: queryKeys.evidence(candidateId),
-    queryFn: () => getEvidence(candidateId),
+    queryKey: queryKeys.evidence(candidateId ?? ''),
+    queryFn: () => getEvidence(candidateId!),
+    enabled: !!candidateId,
   })
 
   const analysisMutation = useMutation({
@@ -125,6 +126,14 @@ export function CandidateEvidenceReviewScreen() {
       navigate('/analysis')
     },
   })
+
+  // Guard: candidateId is set by ResumeJDInputScreen after a successful resume upload.
+  // SessionGuard only checks resumeId and jobDescriptionId, so we guard here too.
+  if (!candidateId) {
+    return (
+      <ErrorBanner message="Session is missing candidate information. Please start over from the input screen." />
+    )
+  }
 
   if (evidenceQuery.isLoading) return <LoadingSpinner />
   if (evidenceQuery.isError) {

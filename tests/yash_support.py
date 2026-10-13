@@ -28,8 +28,14 @@ from backend.app.models.resume_version import ResumeVersion
 from backend.app.services.ats_scorer import DISCLOSURE, ScoreResult
 
 
-def make_session() -> Session:
-    """Create an in-memory SQLite session with all required tables."""
+def make_session():
+    """Create an in-memory SQLite session with all required tables.
+
+    Returns a :class:`sqlalchemy.orm.Session` instance.  ``Session``
+    implements ``__enter__`` / ``__exit__``, so callers may use it either
+    directly (``db = make_session()``) or as a context manager
+    (``with make_session() as db``).
+    """
     engine = create_engine(
         "sqlite://",
         connect_args={"check_same_thread": False},

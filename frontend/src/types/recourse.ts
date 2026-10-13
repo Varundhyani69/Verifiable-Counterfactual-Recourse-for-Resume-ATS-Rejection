@@ -11,7 +11,7 @@ export interface ProposedEditResponse {
 }
 
 export interface PartialResult {
-  edits: ProposedEditResponse[]
+  edits: ExplanationCardResponse[]
   total_edit_cost: number
   projected_score: number
 }
@@ -19,7 +19,7 @@ export interface PartialResult {
 export interface RecourseGenerateResponse {
   recourse_id: string
   status: 'feasible' | 'infeasible'
-  accepted_edits?: ProposedEditResponse[]
+  accepted_edits?: ExplanationCardResponse[]
   total_edit_cost?: number
   projected_score?: number
   projected_decision?: 'pass' | 'fail'

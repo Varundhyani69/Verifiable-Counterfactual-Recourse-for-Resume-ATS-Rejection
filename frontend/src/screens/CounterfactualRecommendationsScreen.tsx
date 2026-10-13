@@ -3,7 +3,7 @@ import { useNavigate } from 'react-router-dom'
 import { useSession } from '../session'
 import { ExplanationCard } from '../components/ExplanationCard'
 import { ErrorBanner } from '../components/ErrorBanner'
-import type { ProposedEditResponse } from '../types/recourse'
+import type { ExplanationCardResponse } from '../types/recourse'
 import styles from './CounterfactualRecommendationsScreen.module.css'
 
 export function CounterfactualRecommendationsScreen() {
@@ -12,7 +12,7 @@ export function CounterfactualRecommendationsScreen() {
   const recourseResult = session.recourseResult
 
   const initialEdits = recourseResult?.accepted_edits ?? []
-  const [acceptedEdits, setAcceptedEdits] = useState<ProposedEditResponse[]>(initialEdits)
+  const [acceptedEdits, setAcceptedEdits] = useState<ExplanationCardResponse[]>(initialEdits)
 
   if (!recourseResult) {
     return <ErrorBanner message="No recourse result found. Please go back to Analysis." />
@@ -34,13 +34,13 @@ export function CounterfactualRecommendationsScreen() {
   function handleConfirm(editId: string) {
     setAcceptedEdits(prev =>
       prev.map(e =>
-        e.id === editId ? { ...e, verification_status: 'Supported' } : e,
+        e.edit_id === editId ? { ...e, verification_status: 'Supported' } : e,
       ),
     )
   }
 
   function handleReject(editId: string) {
-    setAcceptedEdits(prev => prev.filter(e => e.id !== editId))
+    setAcceptedEdits(prev => prev.filter(e => e.edit_id !== editId))
   }
 
   return (
@@ -78,7 +78,7 @@ export function CounterfactualRecommendationsScreen() {
 
       {acceptedEdits.map(edit => (
         <ExplanationCard
-          key={edit.id}
+          key={edit.edit_id}
           edit={edit}
           onConfirm={handleConfirm}
           onReject={handleReject}
@@ -90,7 +90,7 @@ export function CounterfactualRecommendationsScreen() {
           <h2>Partial Edits</h2>
           {recourseResult.partial_result.edits.map(edit => (
             <ExplanationCard
-              key={edit.id}
+              key={edit.edit_id}
               edit={edit}
               onConfirm={() => {}}
               onReject={() => {}}

@@ -111,9 +111,27 @@ export const handlers = [
       data: {
         recourse_id: FAKE_RECOURSE_ID,
         status: 'feasible',
-        accepted_edits: [],
-        total_edit_cost: 0.0,
-        projected_score: 0.75,
+        accepted_edits: [
+          {
+            edit_id: 'edit-0001-0000-0000-000000000001',
+            prose_description: 'Add Python experience to demonstrate alignment with job requirements.',
+            ats_improvement_reason: 'The job requires Python; adding it improves skill overlap score.',
+            original_text: 'Developed software solutions.',
+            proposed_text: 'Developed Python-based software solutions.',
+            edit_type: 'rephrase',
+            evidence_fact_ids: [],
+            evidence_claim_texts: [],
+            job_requirement_ids: [],
+            requirement_texts: [],
+            verification_status: 'Needs Confirmation',
+            edit_cost: 0.2,
+            score_contribution: 0.15,
+            can_confirm: true,
+            can_reject: true,
+          },
+        ],
+        total_edit_cost: 0.2,
+        projected_score: 0.87,
         projected_decision: 'pass',
       },
     }, { status: 201 })
@@ -159,6 +177,39 @@ export const handlers = [
   }),
 
   http.get('/api/experiments/:id', () => {
+    return HttpResponse.json({
+      data: {
+        id: 'ffffffff-ffff-ffff-ffff-ffffffffffff',
+        resume_id: FAKE_RESUME_ID,
+        job_description_id: FAKE_JD_ID,
+        model_configuration: {},
+        baseline_method: 'original_resume',
+        original_score: 0.4,
+        final_score: 0.72,
+        threshold: 0.5,
+        decision_flipped: true,
+        total_edit_cost: 0.3,
+        grounding_metrics: {},
+        random_seed: null,
+        created_at: new Date().toISOString(),
+      },
+    })
+  }),
+
+  // Additional endpoints (14 total to match spec requirement)
+  http.get('/api/job-descriptions/:id', () => {
+    return HttpResponse.json({
+      data: {
+        id: FAKE_JD_ID,
+        raw_text: 'Python required',
+        requirements: [],
+        warning: null,
+        created_at: new Date().toISOString(),
+      },
+    })
+  }),
+
+  http.get('/api/experiments/:id/report', () => {
     return HttpResponse.json({
       data: {
         id: 'ffffffff-ffff-ffff-ffff-ffffffffffff',

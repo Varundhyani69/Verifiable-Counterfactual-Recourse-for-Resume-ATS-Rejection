@@ -12,8 +12,12 @@ export function ATSAnalysisScreen() {
   const result = session.analysisResult
 
   const recourseMutation = useMutation({
-    mutationFn: () =>
-      generateRecourse(session.resumeVersionId!, session.jobDescriptionId!),
+    mutationFn: () => {
+      if (!session.resumeVersionId || !session.jobDescriptionId) {
+        throw new Error('Session is missing required IDs. Please go back and re-run the analysis.')
+      }
+      return generateRecourse(session.resumeVersionId, session.jobDescriptionId)
+    },
     onSuccess: data => {
       setSession({ recourseId: data.recourse_id, recourseResult: data })
       navigate('/recommendations')
